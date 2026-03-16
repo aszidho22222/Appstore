@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>App Store - User</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2a2a4a 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* View Management */
+        .view {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        .view.active { display: flex; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Header & Search */
+        .header {
+            padding: 20px;
+            padding-top: 40px;
+        }
+        .header h1 { font-size: 24px; margin-bottom: 15px; }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-radius: 30px;
+        }
+        .search-bar i { color: #aaa; margin-right: 10px; }
+        .search-bar input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #fff;
+            width: 100%;
+            font-size: 16px;
+        }
+        .search-bar input::placeholder { color: #aaa; }
+
+        /* App List (Home) */
+        .app-list {
+            padding: 10px 20px;
+            overflow-y: auto;
+            flex: 1;
+            padding-bottom: 80px;
+        }
+        .app-list::-webkit-scrollbar { display: none; }
+        
+        .app-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 16px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .app-card:active { transform: scale(0.95); }
+        .app-card img {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+        .app-info { flex: 1; }
+        .app-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .app-info p { font-size: 12px; color: #ccc; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .btn-open {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* App Grid (Explore) */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 10px 20px 80px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .app-grid::-webkit-scrollbar { display: none; }
+        
+        .grid-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            border-radius: 16px;
+            transition: 0.2s;
+            cursor: pointer;
+            text-align: center;
+        }
+        .grid-card:active { transform: scale(0.95); }
+        .grid-card img {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .grid-card h3 { 
+            font-size: 14px; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+        }
+
+        /* App Details View */
+        .details-header { padding: 40px 20px 20px; display: flex; align-items: center; }
+        .back-btn { background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        
+        .app-banner {
+            text-align: center;
+            padding: 20px;
+        }
+        .app-banner img {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+        .app-desc-container {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            margin: 10px 20px;
+        }
+        .app-desc-container p { font-size: 14px; color: #ddd; line-height: 1.6; }
+        
+        .launch-btn-container { padding: 20px; text-align: center; }
+        .launch-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+            transition: 0.2s;
+        }
+        .launch-btn:active { transform: scale(0.95); }
+
+        /* Full Screen Iframe */
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            background: #fff;
+            display: block;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            border-bottom: none;
+            z-index: 100;
+        }
+        .nav-item {
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .nav-item.active { color: #fff; transform: translateY(-3px); }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 50px auto;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- Home View -->
+    <div id="home-view" class="view active">
+        <div class="header">
+            <h1>App Store</h1>
+            <div class="search-bar glass">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search apps...">
+            </div>
+        </div>
+        <div id="loading" class="loader"></div>
+        <div class="app-list" id="appList">
+            <!-- Dynamic Apps Here -->
+        </div>
+    </div>
+
+    <!-- Explore View (New) -->
+    <div id="explore-view" class="view">
+        <div class="header">
+            <h1>Explore Apps</h1>
+        </div>
+        <div class="app-grid" id="exploreList">
+            <!-- Dynamic Grid Apps Here -->
+        </div>
+    </div>
+
+    <!-- App Details View -->
+    <div id="details-view" class="view">
+        <div class="details-header">
+            <button class="back-btn" onclick="goBackUI()"><i class="fas fa-arrow-left"></i></button>
+        </div>
+        <div class="app-banner">
+            <img id="det-logo" src="" alt="App Logo">
+            <h2 id="det-name">App Name</h2>
+        </div>
+        <div class="app-desc-container glass">
+            <h3>About App</h3>
+            <p id="det-desc" style="margin-top: 10px;">Description here</p>
+        </div>
+        <div class="launch-btn-container">
+            <button class="launch-btn" onclick="openApp()"><i class="fas fa-play"></i> Open App</button>
+        </div>
+    </div>
+
+    <!-- Run App View (Fullscreen without headers) -->
+    <div id="run-view" class="view">
+        <iframe id="appFrame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+
+    <!-- Shared Bottom Navigation -->
+    <div class="bottom-nav glass" id="mainNav">
+        <i class="fas fa-home nav-item active" id="nav-home" onclick="goHome()"></i>
+        <i class="fas fa-compass nav-item" id="nav-explore" onclick="goExplore()"></i>
+    </div>
+
+    <script>
+        // === FIREBASE CONFIGURATION ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTS7y25bPLgjWbt94BGAl_t60ZZlQ_v00",
+            authDomain: "app-store-bd8e9.firebaseapp.com",
+            databaseURL: "https://app-store-bd8e9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "app-store-bd8e9",
+            storageBucket: "app-store-bd8e9.firebasestorage.app",
+            messagingSenderId: "60175333244",
+            appId: "1:60175333244:web:9f5f737907ada12e1696f9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let allApps = {};
+        let currentAppId = null;
+
+        // Fetch Apps in Real-time
+        db.ref('apps').on('value', (snapshot) => {
+            document.getElementById('loading').style.display = 'none';
+            allApps = snapshot.val() || {};
+            renderApps(allApps);
+
+            // Real-time update for running app
+            if(currentAppId && allApps[currentAppId]) {
+                const updatedCode = allApps[currentAppId].htmlcode;
+                const iframe = document.getElementById('appFrame');
+                if(iframe.srcdoc !== updatedCode) {
+                    iframe.srcdoc = updatedCode; // Auto update live app
+                }
+            } else if (currentAppId && !allApps[currentAppId]) {
+                alert("This app was removed by the admin.");
+                goHome();
+            }
+        });
+
+        // Search System (Only works in Home)
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderApps(allApps, e.target.value);
+        });
+
+        function renderApps(appsObj, filterText = "") {
+            const appList = document.getElementById('appList');
+            const exploreList = document.getElementById('exploreList');
+            
+            appList.innerHTML = '';
+            if(exploreList) exploreList.innerHTML = '';
+            
+            Object.keys(appsObj).forEach(key => {
+                const app = appsObj[key];
+                
+                // --- HOME LIST RENDER (with search filter) ---
+                if(app.name.toLowerCase().includes(filterText.toLowerCase()) || 
+                   app.description.toLowerCase().includes(filterText.toLowerCase())) {
+                    
+                    const card = document.createElement('div');
+                    card.className = 'app-card glass';
+                    card.onclick = () => showDetails(key);
+                    
+                    card.innerHTML = `
+                        <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/60'">
+                        <div class="app-info">
+                            <h3>${app.name}</h3>
+                            <p>${app.description}</p>
+                        </div>
+                        <button class="btn-open">VIEW</button>
+                    `;
+                    appList.appendChild(card);
+                }
+
+                // --- EXPLORE GRID RENDER (shows all apps without filter) ---
+                if(exploreList && filterText === "") {
+                    const gridCard = document.createElement('div');
+                    gridCard.className = 'grid-card glass';
+                    gridCard.onclick = () => showDetails(key);
+                    
+                    gridCard.innerHTML = `
+                        <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/60'">
+                        <h3>${app.name}</h3>
+                    `;
+                    exploreList.appendChild(gridCard);
+                }
+            });
+        }
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            // Show or hide bottom navigation based on active view
+            const nav = document.getElementById('mainNav');
+            if(viewId === 'home-view' || viewId === 'explore-view') {
+                nav.style.display = 'flex';
+            } else {
+                nav.style.display = 'none';
+            }
+        }
+
+        // === NAVIGATION CONTROLS ===
+        function goHome() {
+            switchView('home-view');
+            document.getElementById('nav-home').classList.add('active');
+            document.getElementById('nav-explore').classList.remove('active');
+            currentAppId = null;
+        }
+
+        function goExplore() {
+            switchView('explore-view');
+            document.getElementById('nav-explore').classList.add('active');
+            document.getElementById('nav-home').classList.remove('active');
+            currentAppId = null;
+            
+            // Push history so back button from explore returns to home
+            window.history.pushState({ page: "explore" }, "", "");
+        }
+
+        function showDetails(id) {
+            currentAppId = id;
+            const app = allApps[id];
+            document.getElementById('det-logo').src = app.logo;
+            document.getElementById('det-name').innerText = app.name;
+            document.getElementById('det-desc').innerText = app.description;
+            switchView('details-view');
+            
+            window.history.pushState({ page: "details" }, "", "");
+        }
+
+        function openApp() {
+            if(!currentAppId) return;
+            const app = allApps[currentAppId];
+            document.getElementById('appFrame').srcdoc = app.htmlcode;
+            switchView('run-view');
+            
+            window.history.pushState({ page: "runApp" }, "", "");
+        }
+
+        function goBackUI() {
+            if(window.history.state) {
+                window.history.back(); // This will trigger popstate
+            } else {
+                goHome();
+            }
+        }
+
+        // === HARDWARE BACK BUTTON (History API Integration) ===
+        window.addEventListener("popstate", function(event) {
+            const state = event.state;
+            
+            // If user is leaving runApp, clear iframe memory instantly
+            if (document.getElementById('run-view').classList.contains('active')) {
+                document.getElementById('appFrame').srcdoc = ""; 
+            }
+
+            if (!state || !state.page) {
+                // No state means we return to the root (Home)
+                goHome();
+            } else if (state.page === "explore") {
+                // If previous state was explore, show explore UI
+                switchView('explore-view');
+                document.getElementById('nav-explore').classList.add('active');
+                document.getElementById('nav-home').classList.remove('active');
+            } else if (state.page === "details") {
+                // If previous state was details, show details UI
+                switchView('details-view');
+            }
+        });
+
+    </script>
+</body>
+</html>
