@@ -81,10 +81,9 @@
 
         /* App List (Home) */
         .app-list {
-            padding: 10px 20px;
+            padding: 10px 20px 20px; /* Padding bottom adjusted since bottom nav is removed */
             overflow-y: auto;
             flex: 1;
-            padding-bottom: 80px;
         }
         .app-list::-webkit-scrollbar { display: none; }
         
@@ -116,43 +115,6 @@
             border-radius: 20px;
             font-weight: 600;
             font-size: 12px;
-        }
-
-        /* App Grid (Explore) */
-        .app-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 10px 20px 80px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .app-grid::-webkit-scrollbar { display: none; }
-        
-        .grid-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-            border-radius: 16px;
-            transition: 0.2s;
-            cursor: pointer;
-            text-align: center;
-        }
-        .grid-card:active { transform: scale(0.95); }
-        .grid-card img {
-            width: 70px;
-            height: 70px;
-            border-radius: 15px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-        .grid-card h3 { 
-            font-size: 14px; 
-            display: -webkit-box; 
-            -webkit-line-clamp: 2; 
-            -webkit-box-orient: vertical; 
-            overflow: hidden; 
         }
 
         /* App Details View */
@@ -203,27 +165,6 @@
             display: block;
         }
 
-        /* Bottom Nav */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            border-bottom: none;
-            z-index: 100;
-        }
-        .nav-item {
-            color: #aaa;
-            font-size: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .nav-item.active { color: #fff; transform: translateY(-3px); }
-
         /* Loading Spinner */
         .loader {
             border: 4px solid rgba(255,255,255,0.1);
@@ -254,16 +195,6 @@
         </div>
     </div>
 
-    <!-- Explore View (New) -->
-    <div id="explore-view" class="view">
-        <div class="header">
-            <h1>Explore Apps</h1>
-        </div>
-        <div class="app-grid" id="exploreList">
-            <!-- Dynamic Grid Apps Here -->
-        </div>
-    </div>
-
     <!-- App Details View -->
     <div id="details-view" class="view">
         <div class="details-header">
@@ -285,12 +216,6 @@
     <!-- Run App View (Fullscreen without headers) -->
     <div id="run-view" class="view">
         <iframe id="appFrame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-    </div>
-
-    <!-- Shared Bottom Navigation -->
-    <div class="bottom-nav glass" id="mainNav">
-        <i class="fas fa-home nav-item active" id="nav-home" onclick="goHome()"></i>
-        <i class="fas fa-compass nav-item" id="nav-explore" onclick="goExplore()"></i>
     </div>
 
     <script>
@@ -330,17 +255,14 @@
             }
         });
 
-        // Search System (Only works in Home)
+        // Search System
         document.getElementById('searchInput').addEventListener('input', (e) => {
             renderApps(allApps, e.target.value);
         });
 
         function renderApps(appsObj, filterText = "") {
             const appList = document.getElementById('appList');
-            const exploreList = document.getElementById('exploreList');
-            
             appList.innerHTML = '';
-            if(exploreList) exploreList.innerHTML = '';
             
             Object.keys(appsObj).forEach(key => {
                 const app = appsObj[key];
@@ -363,51 +285,18 @@
                     `;
                     appList.appendChild(card);
                 }
-
-                // --- EXPLORE GRID RENDER (shows all apps without filter) ---
-                if(exploreList && filterText === "") {
-                    const gridCard = document.createElement('div');
-                    gridCard.className = 'grid-card glass';
-                    gridCard.onclick = () => showDetails(key);
-                    
-                    gridCard.innerHTML = `
-                        <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/60'">
-                        <h3>${app.name}</h3>
-                    `;
-                    exploreList.appendChild(gridCard);
-                }
             });
         }
 
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
-
-            // Show or hide bottom navigation based on active view
-            const nav = document.getElementById('mainNav');
-            if(viewId === 'home-view' || viewId === 'explore-view') {
-                nav.style.display = 'flex';
-            } else {
-                nav.style.display = 'none';
-            }
         }
 
         // === NAVIGATION CONTROLS ===
         function goHome() {
             switchView('home-view');
-            document.getElementById('nav-home').classList.add('active');
-            document.getElementById('nav-explore').classList.remove('active');
             currentAppId = null;
-        }
-
-        function goExplore() {
-            switchView('explore-view');
-            document.getElementById('nav-explore').classList.add('active');
-            document.getElementById('nav-home').classList.remove('active');
-            currentAppId = null;
-            
-            // Push history so back button from explore returns to home
-            window.history.pushState({ page: "explore" }, "", "");
         }
 
         function showDetails(id) {
@@ -450,11 +339,6 @@
             if (!state || !state.page) {
                 // No state means we return to the root (Home)
                 goHome();
-            } else if (state.page === "explore") {
-                // If previous state was explore, show explore UI
-                switchView('explore-view');
-                document.getElementById('nav-explore').classList.add('active');
-                document.getElementById('nav-home').classList.remove('active');
             } else if (state.page === "details") {
                 // If previous state was details, show details UI
                 switchView('details-view');
