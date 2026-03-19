@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>App Store - User</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium App Store</title>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase Compat -->
@@ -13,218 +13,370 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
     <style>
-        /* Force strictly block width calculation */
+        :root {
+            --bg-color: #0f1016;
+            --primary: #007aff;
+            --primary-glow: rgba(0, 122, 255, 0.4);
+            --danger: #ef4444;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+        }
+
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box !important; 
-            font-family: 'Roboto', sans-serif;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Screen Lock: Prevents overall page moving side-to-side */
-        html, body {
-            width: 100%;
-            max-width: 100vw;
-            height: 100%;
-            overflow: hidden; 
-            background: linear-gradient(135deg, #1e1e2f 0%, #2a2a4a 100%);
-            color: #fff;
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 122, 255, 0.15), transparent 25%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow: hidden;
         }
 
         h1, h2, h3 { font-family: 'Poppins', sans-serif; }
 
-        /* Glassmorphism Classes */
+        /* Premium Glassmorphism */
         .glass {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
         /* View Management */
         .view {
             display: none;
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
+            height: 100vh;
+            width: 100vw;
             flex-direction: column;
-            overflow: hidden; /* Stops horizontal scrolling entirely */
-            animation: fadeIn 0.4s ease-in-out;
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .view.active { display: flex; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         /* Header & Search */
         .header {
-            padding: 40px 15px 20px 15px;
-            width: 100%;
+            padding: 20px 24px 15px; /* Adjusted padding since title is removed */
+            position: relative;
+            z-index: 10;
         }
-        .header h1 { font-size: 24px; margin-bottom: 15px; }
         
         .search-bar {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            border-radius: 30px;
-            width: 100%;
+            padding: 16px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
         }
-        .search-bar i { color: #aaa; margin-right: 10px; flex-shrink: 0; }
+        .search-bar:focus-within {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .search-bar i { color: var(--text-muted); margin-right: 12px; font-size: 18px; }
         .search-bar input {
             background: transparent;
             border: none;
             outline: none;
-            color: #fff;
+            color: var(--text-main);
             width: 100%;
             font-size: 16px;
+            font-weight: 500;
         }
-        .search-bar input::placeholder { color: #aaa; }
+        .search-bar input::placeholder { color: #6b7280; font-weight: 400; }
 
-        /* App List Container */
-        .app-list {
-            padding: 0 15px 20px 15px;
-            width: 100%;
-            flex: 1;
+        /* App Grid (Beautiful Square/Rectangular Layout for both Home & Explore) */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 10px 24px 120px;
             overflow-y: auto;
-            overflow-x: hidden; /* Lock horizontal scroll */
+            flex: 1;
         }
-        .app-list::-webkit-scrollbar { display: none; }
+        .app-grid::-webkit-scrollbar { display: none; }
         
-        /* Strict App Card Layout */
-        .app-card {
+        .grid-card {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 16px;
-            transition: 0.2s;
+            padding: 24px 16px;
+            border-radius: 28px;
+            transition: all 0.3s ease;
             cursor: pointer;
-            width: 100%;
-            max-width: 100%; /* Extra lock */
-            overflow: hidden; /* Extra lock */
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .app-card:active { transform: scale(0.95); }
-        
-        .app-card img {
-            width: 55px;
-            height: 55px;
-            border-radius: 12px;
+        .grid-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1), transparent);
+            opacity: 0; transition: 0.3s;
+        }
+        .grid-card:hover::before { opacity: 1; }
+        .grid-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2); }
+        .grid-card:active { transform: scale(0.95); }
+        .grid-card img {
+            width: 90px; /* Bigger Logo */
+            height: 90px; /* Bigger Logo */
+            border-radius: 24px;
             object-fit: cover;
-            flex-shrink: 0; /* Prevents image from squishing */
+            margin-bottom: 16px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            z-index: 1;
         }
-        
-        .app-info { 
-            flex: 1 1 auto; 
-            min-width: 0; /* MAGIC FIX: Stops long text from pushing the button out */
-            padding: 0 12px; /* Replaces margin to stay inside box-sizing */
-        }
-        
-        .app-info h3 { 
-            font-size: 15px; 
-            margin-bottom: 4px;
-            white-space: nowrap; /* Keeps text in one line */
-            overflow: hidden; 
-            text-overflow: ellipsis; /* Adds ... */
-        }
-        
-        .app-info p { 
-            font-size: 12px; 
-            color: #ccc; 
+        .grid-card h3 { 
+            font-size: 16px; 
+            font-weight: 600;
+            color: #fff;
             display: -webkit-box; 
             -webkit-line-clamp: 2; 
             -webkit-box-orient: vertical; 
             overflow: hidden; 
+            z-index: 1;
+            line-height: 1.3;
         }
-        
-        .btn-open {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-weight: 600;
+        .grid-card .get-badge {
+            margin-top: 14px;
+            background: rgba(255,255,255,0.1);
+            color: var(--primary);
             font-size: 12px;
-            white-space: nowrap; /* Prevents button text breaking */
-            flex-shrink: 0; /* MAGIC FIX: Prevents button from being squeezed or pushed out */
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 14px;
+            z-index: 1;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         /* App Details View */
         .details-header { 
-            padding: 40px 15px 10px 15px; 
+            padding: 20px 24px 10px; 
             display: flex; 
+            justify-content: space-between;
             align-items: center; 
-            width: 100%;
         }
-        .back-btn { background: transparent; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+        .action-btn { 
+            background: var(--glass-bg); 
+            border: 1px solid var(--glass-border); 
+            color: #fff; 
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 18px; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            backdrop-filter: blur(10px);
+        }
+        .action-btn:active { transform: scale(0.9); }
         
         .app-banner {
             text-align: center;
-            padding: 10px 15px;
-            width: 100%;
+            padding: 10px 20px 20px;
+            animation: fadeInScale 0.5s ease;
+        }
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
         }
         .app-banner img {
-            width: 100px;
-            height: 100px;
-            border-radius: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            margin-bottom: 15px;
+            width: 130px;
+            height: 130px;
+            border-radius: 32px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .app-banner h2 { font-size: 20px; }
+        .app-banner h2 { font-size: 24px; font-weight: 700; }
         
         .app-desc-container {
-            padding: 15px;
+            padding: 24px;
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
-            margin: 0 15px 10px 15px;
-            word-wrap: break-word;
+            margin: 0 24px;
+            border-radius: 24px;
         }
-        .app-desc-container p { font-size: 14px; color: #ddd; line-height: 1.6; }
+        .app-desc-container::-webkit-scrollbar { display: none; }
+        .app-desc-container h3 { font-size: 18px; margin-bottom: 12px; color: #fff; }
+        .app-desc-container p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
         
-        .launch-btn-container { 
-            padding: 10px 15px 20px 15px; 
-            text-align: center; 
-            width: 100%;
-        }
+        .launch-btn-container { padding: 20px 24px 30px; text-align: center; }
         .launch-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             border: none;
-            border-radius: 30px;
+            border-radius: 20px;
             color: #fff;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+            box-shadow: 0 8px 25px var(--primary-glow);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .launch-btn:active { transform: scale(0.96); box-shadow: 0 4px 15px var(--primary-glow); }
+        .launch-btn.paused {
+            background: var(--glass-bg);
+            box-shadow: none;
+            color: var(--danger);
+            border: 1px solid var(--danger);
         }
 
         /* Full Screen Iframe */
+        #run-view { background: #000; position: relative; }
         iframe {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             border: none;
             background: #fff;
             display: block;
         }
-
-        /* Loading Spinner */
-        .loader {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-left-color: #fff;
+        
+        /* Floating Close Button for Iframe */
+        .close-iframe-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 50px auto;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
         }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .close-iframe-btn:active { transform: scale(0.9); }
+
+        /* Floating Bottom Nav */
+        .bottom-nav-wrapper {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 100;
+        }
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 12px 20px;
+            width: 200px;
+            border-radius: 30px;
+            background: rgba(20, 20, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-item {
+            color: #6b7280;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px;
+        }
+        .nav-item.active { 
+            color: var(--primary); 
+            transform: translateY(-2px); 
+        }
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        /* Loader */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-bottom-color: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            margin: 80px auto;
+            display: block;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Modal for Pause Message */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #1a1b26;
+            padding: 30px 24px;
+            border-radius: 28px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: slideUpFade 0.3s ease;
+        }
+        .modal-content i { font-size: 40px; color: var(--danger); margin-bottom: 15px; }
+        .modal-content h3 { font-size: 20px; margin-bottom: 10px; color: #fff; }
+        .modal-content p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+        .modal-btn {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-btn:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
@@ -232,42 +384,72 @@
     <!-- Home View -->
     <div id="home-view" class="view active">
         <div class="header">
-            <h1>App Store</h1>
             <div class="search-bar glass">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search apps...">
+                <input type="text" id="searchInput" placeholder="Search apps & games...">
             </div>
         </div>
         <div id="loading" class="loader"></div>
-        <div class="app-list" id="appList">
-            <!-- Dynamic Apps Here -->
+        <div class="app-grid" id="appList">
+            <!-- Dynamic Grid Apps Here -->
+        </div>
+    </div>
+
+    <!-- Explore View -->
+    <div id="explore-view" class="view">
+        <div class="header">
+            <!-- Title Removed, leaving space at the top -->
+        </div>
+        <div class="app-grid" id="exploreList">
+            <!-- Dynamic Grid Apps Here -->
         </div>
     </div>
 
     <!-- App Details View -->
     <div id="details-view" class="view">
         <div class="details-header">
-            <button class="back-btn" onclick="goBackUI()"><i class="fas fa-arrow-left"></i></button>
+            <button class="action-btn" onclick="goBackUI()"><i class="fas fa-chevron-left"></i></button>
+            <button class="action-btn" onclick="copyApplink()" title="Copy Direct Link"><i class="fas fa-link"></i></button>
         </div>
         <div class="app-banner">
             <img id="det-logo" src="" alt="App Logo">
             <h2 id="det-name">App Name</h2>
         </div>
         <div class="app-desc-container glass">
-            <h3>About App</h3>
-            <p id="det-desc" style="margin-top: 10px;">Description here</p>
+            <h3>About this App</h3>
+            <p id="det-desc">Description here</p>
         </div>
         <div class="launch-btn-container">
-            <button class="launch-btn" onclick="openApp()"><i class="fas fa-play"></i> Open App</button>
+            <button id="open-btn" class="launch-btn" onclick="openApp()"><i class="fas fa-play"></i> Open App</button>
         </div>
     </div>
 
     <!-- Run App View -->
     <div id="run-view" class="view">
+        <button class="close-iframe-btn" onclick="goBackUI()"><i class="fas fa-times"></i></button>
         <iframe id="appFrame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
 
+    <!-- Floating Bottom Navigation -->
+    <div class="bottom-nav-wrapper" id="mainNavWrapper">
+        <div class="bottom-nav" id="mainNav">
+            <i class="fas fa-house nav-item active" id="nav-home" onclick="goHome()"></i>
+            <i class="fas fa-compass nav-item" id="nav-explore" onclick="goExplore()"></i>
+        </div>
+    </div>
+
+    <!-- Pause/Maintenance Modal -->
+    <div class="modal-overlay" id="pauseModal">
+        <div class="modal-content">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>App Unavailable</h3>
+            <p id="pauseMessage">This app is currently paused by the admin.</p>
+            <button class="modal-btn" onclick="closePauseModal()">Understood</button>
+        </div>
+    </div>
+
     <script>
+        // === FIREBASE CONFIGURATION (Untouched) ===
         const firebaseConfig = {
             apiKey: "AIzaSyBTS7y25bPLgjWbt94BGAl_t60ZZlQ_v00",
             authDomain: "app-store-bd8e9.firebaseapp.com",
@@ -283,17 +465,38 @@
 
         let allApps = {};
         let currentAppId = null;
+        let initialLoadDone = false;
 
+        // Fetch Apps in Real-time
         db.ref('apps').on('value', (snapshot) => {
             document.getElementById('loading').style.display = 'none';
             allApps = snapshot.val() || {};
             renderApps(allApps);
 
+            // Handle Direct Link Opening
+            if (!initialLoadDone) {
+                initialLoadDone = true;
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestedAppId = urlParams.get('app');
+                if (requestedAppId && allApps[requestedAppId]) {
+                    showDetails(requestedAppId);
+                    // Open the app directly after a short delay to allow UI rendering
+                    setTimeout(() => openApp(), 300); 
+                }
+            }
+
+            // Realtime Update & Kick-out logic if app gets paused
             if(currentAppId && allApps[currentAppId]) {
-                const updatedCode = allApps[currentAppId].htmlcode;
-                const iframe = document.getElementById('appFrame');
-                if(iframe.srcdoc !== updatedCode) {
-                    iframe.srcdoc = updatedCode; 
+                const app = allApps[currentAppId];
+                updateDetailsButtonState(app);
+
+                if (app.isPaused && document.getElementById('run-view').classList.contains('active')) {
+                    document.getElementById('appFrame').srcdoc = ""; 
+                    showPauseModal(app.pauseNote || "The admin has temporarily paused this app for maintenance.");
+                    switchView('details-view'); 
+                } else if (!app.isPaused && document.getElementById('run-view').classList.contains('active')) {
+                    const iframe = document.getElementById('appFrame');
+                    if(iframe.srcdoc !== app.htmlcode) iframe.srcdoc = app.htmlcode; 
                 }
             } else if (currentAppId && !allApps[currentAppId]) {
                 alert("This app was removed by the admin.");
@@ -301,33 +504,45 @@
             }
         });
 
+        // Search System
         document.getElementById('searchInput').addEventListener('input', (e) => {
             renderApps(allApps, e.target.value);
         });
 
         function renderApps(appsObj, filterText = "") {
             const appList = document.getElementById('appList');
+            const exploreList = document.getElementById('exploreList');
+            
             appList.innerHTML = '';
+            if(exploreList) exploreList.innerHTML = '';
             
             Object.keys(appsObj).forEach(key => {
                 const app = appsObj[key];
                 
+                // HTML Template for both pages (Beautiful Grid System)
+                const gridHtml = `
+                    <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/90'">
+                    <h3>${app.name}</h3>
+                    <div class="get-badge">OPEN</div>
+                `;
+
+                // Render in Home (Search filtering works here)
                 if(app.name.toLowerCase().includes(filterText.toLowerCase()) || 
                    app.description.toLowerCase().includes(filterText.toLowerCase())) {
-                    
                     const card = document.createElement('div');
-                    card.className = 'app-card glass';
+                    card.className = 'grid-card';
                     card.onclick = () => showDetails(key);
-                    
-                    card.innerHTML = `
-                        <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/60'">
-                        <div class="app-info">
-                            <h3>${app.name}</h3>
-                            <p>${app.description}</p>
-                        </div>
-                        <button class="btn-open">VIEW</button>
-                    `;
+                    card.innerHTML = gridHtml;
                     appList.appendChild(card);
+                }
+
+                // Render in Explore (No filter)
+                if(exploreList && filterText === "") {
+                    const gridCard = document.createElement('div');
+                    gridCard.className = 'grid-card';
+                    gridCard.onclick = () => showDetails(key);
+                    gridCard.innerHTML = gridHtml;
+                    exploreList.appendChild(gridCard);
                 }
             });
         }
@@ -335,11 +550,30 @@
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
+
+            const navWrapper = document.getElementById('mainNavWrapper');
+            if(viewId === 'home-view' || viewId === 'explore-view') {
+                navWrapper.style.display = 'flex';
+            } else {
+                navWrapper.style.display = 'none';
+            }
         }
 
+        // === NAVIGATION CONTROLS ===
         function goHome() {
             switchView('home-view');
+            document.getElementById('nav-home').classList.add('active');
+            document.getElementById('nav-explore').classList.remove('active');
             currentAppId = null;
+            removeUrlParam();
+        }
+
+        function goExplore() {
+            switchView('explore-view');
+            document.getElementById('nav-explore').classList.add('active');
+            document.getElementById('nav-home').classList.remove('active');
+            currentAppId = null;
+            removeUrlParam();
         }
 
         function showDetails(id) {
@@ -348,39 +582,104 @@
             document.getElementById('det-logo').src = app.logo;
             document.getElementById('det-name').innerText = app.name;
             document.getElementById('det-desc').innerText = app.description;
-            switchView('details-view');
             
-            window.history.pushState({ page: "details" }, "", "");
+            updateDetailsButtonState(app);
+            switchView('details-view');
+            setUrlParam(id);
+        }
+
+        function updateDetailsButtonState(app) {
+            const btn = document.getElementById('open-btn');
+            if (app.isPaused) {
+                btn.innerHTML = `<i class="fas fa-pause-circle"></i> App Paused`;
+                btn.classList.add('paused');
+            } else {
+                btn.innerHTML = `<i class="fas fa-play"></i> Open App`;
+                btn.classList.remove('paused');
+            }
         }
 
         function openApp() {
             if(!currentAppId) return;
             const app = allApps[currentAppId];
+            
+            if (app.isPaused) {
+                showPauseModal(app.pauseNote || "The admin has temporarily paused this app for maintenance.");
+                return; 
+            }
+
             document.getElementById('appFrame').srcdoc = app.htmlcode;
             switchView('run-view');
-            
-            window.history.pushState({ page: "runApp" }, "", "");
         }
 
+        // === IMPROVED BACK BUTTON LOGIC ===
         function goBackUI() {
-            if(window.history.state) {
-                window.history.back(); 
+            if (document.getElementById('run-view').classList.contains('active')) {
+                document.getElementById('appFrame').srcdoc = ""; // Kill iframe
+                switchView('details-view');
+                setUrlParam(currentAppId);
+            } else if (document.getElementById('details-view').classList.contains('active')) {
+                goHome();
             } else {
                 goHome();
             }
         }
 
-        window.addEventListener("popstate", function(event) {
-            const state = event.state;
+        // === URL PARAMETER MANAGEMENT ===
+        function setUrlParam(id) {
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?app=' + id;
+            window.history.pushState({ page: "details", appId: id }, "", newUrl);
+        }
+
+        function removeUrlParam() {
+            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.pushState({ page: "home" }, "", newUrl);
+        }
+
+        // === IMPROVED COPY LINK SYSTEM (Fallback Added) ===
+        function copyApplink() {
+            const urlToCopy = window.location.href;
             
+            if (navigator.clipboard && window.isSecureContext) {
+                // For HTTPS
+                navigator.clipboard.writeText(urlToCopy).then(() => {
+                    alert("Direct app link copied!");
+                });
+            } else {
+                // Fallback for HTTP / Mobile webview
+                let textArea = document.createElement("textarea");
+                textArea.value = urlToCopy;
+                textArea.style.position = "fixed"; 
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert("Direct app link copied!");
+                } catch (err) {
+                    alert("Failed to copy link. Please copy URL from browser.");
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // === MODAL CONTROLS ===
+        function showPauseModal(message) {
+            document.getElementById('pauseMessage').innerText = message;
+            document.getElementById('pauseModal').classList.add('active');
+        }
+
+        function closePauseModal() {
+            document.getElementById('pauseModal').classList.remove('active');
+        }
+
+        // === HARDWARE BACK BUTTON (Phone back button) ===
+        window.addEventListener("popstate", function(event) {
             if (document.getElementById('run-view').classList.contains('active')) {
                 document.getElementById('appFrame').srcdoc = ""; 
-            }
-
-            if (!state || !state.page) {
-                goHome();
-            } else if (state.page === "details") {
                 switchView('details-view');
+            } else if (document.getElementById('details-view').classList.contains('active')) {
+                goHome();
             }
         });
 
