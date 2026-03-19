@@ -57,7 +57,7 @@
         /* View Management */
         .view {
             display: none;
-            height: 100vh;
+            height: 100dvh; /* Mobile bottom cutoff fix */
             width: 100vw;
             flex-direction: column;
             animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -71,7 +71,7 @@
 
         /* Header & Search */
         .header {
-            padding: 20px 24px 15px; /* Adjusted padding since title is removed */
+            padding: 20px 20px 15px; 
             position: relative;
             z-index: 10;
         }
@@ -79,34 +79,36 @@
         .search-bar {
             display: flex;
             align-items: center;
-            padding: 16px 20px;
-            border-radius: 20px;
+            padding: 14px 18px;
+            border-radius: 18px;
             transition: all 0.3s ease;
         }
         .search-bar:focus-within {
             border-color: rgba(255, 255, 255, 0.2);
             box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.4);
         }
-        .search-bar i { color: var(--text-muted); margin-right: 12px; font-size: 18px; }
+        .search-bar i { color: var(--text-muted); margin-right: 12px; font-size: 16px; }
         .search-bar input {
             background: transparent;
             border: none;
             outline: none;
             color: var(--text-main);
             width: 100%;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
         }
         .search-bar input::placeholder { color: #6b7280; font-weight: 400; }
 
-        /* App Grid (Beautiful Square/Rectangular Layout for both Home & Explore) */
+        /* App Grid - Updated for Tight Borders */
         .app-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 10px 24px 120px;
+            /* Auto-fill creates columns exactly the size of the app, wrapping naturally */
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+            gap: 12px; 
+            padding: 10px 20px 100px;
             overflow-y: auto;
             flex: 1;
+            align-content: start;
         }
         .app-grid::-webkit-scrollbar { display: none; }
         
@@ -114,8 +116,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 24px 16px;
-            border-radius: 28px;
+            padding: 12px 10px; /* Very tight padding so the border hugs the app */
+            border-radius: 18px; 
             transition: all 0.3s ease;
             cursor: pointer;
             text-align: center;
@@ -123,7 +125,7 @@
             border: 1px solid rgba(255,255,255,0.1);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
         }
         .grid-card::before {
             content: '';
@@ -133,19 +135,19 @@
             opacity: 0; transition: 0.3s;
         }
         .grid-card:hover::before { opacity: 1; }
-        .grid-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2); }
+        .grid-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); }
         .grid-card:active { transform: scale(0.95); }
         .grid-card img {
-            width: 90px; /* Bigger Logo */
-            height: 90px; /* Bigger Logo */
-            border-radius: 24px;
+            width: 64px; 
+            height: 64px; 
+            border-radius: 16px;
             object-fit: cover;
-            margin-bottom: 16px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            margin-bottom: 8px; /* Tighter margin */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 1;
         }
         .grid-card h3 { 
-            font-size: 16px; 
+            font-size: 13px; /* Matched to tight box */
             font-weight: 600;
             color: #fff;
             display: -webkit-box; 
@@ -153,23 +155,24 @@
             -webkit-box-orient: vertical; 
             overflow: hidden; 
             z-index: 1;
-            line-height: 1.3;
+            line-height: 1.2;
+            width: 100%;
         }
         .grid-card .get-badge {
-            margin-top: 14px;
+            margin-top: 8px; /* Tighter margin */
             background: rgba(255,255,255,0.1);
             color: var(--primary);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            padding: 6px 18px;
-            border-radius: 14px;
+            padding: 4px 12px;
+            border-radius: 12px;
             z-index: 1;
             border: 1px solid rgba(255,255,255,0.05);
         }
 
         /* App Details View */
         .details-header { 
-            padding: 20px 24px 10px; 
+            padding: 15px 20px 10px; 
             display: flex; 
             justify-content: space-between;
             align-items: center; 
@@ -178,10 +181,10 @@
             background: var(--glass-bg); 
             border: 1px solid var(--glass-border); 
             color: #fff; 
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 18px; 
+            font-size: 16px; 
             cursor: pointer; 
             display: flex;
             align-items: center;
@@ -193,7 +196,7 @@
         
         .app-banner {
             text-align: center;
-            padding: 10px 20px 20px;
+            padding: 0px 20px 15px; 
             animation: fadeInScale 0.5s ease;
         }
         @keyframes fadeInScale {
@@ -201,39 +204,44 @@
             100% { opacity: 1; transform: scale(1); }
         }
         .app-banner img {
-            width: 130px;
-            height: 130px;
-            border-radius: 32px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            margin-bottom: 20px;
+            width: 95px; 
+            height: 95px;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            margin-bottom: 15px;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .app-banner h2 { font-size: 24px; font-weight: 700; }
+        .app-banner h2 { font-size: 20px; font-weight: 700; }
         
         .app-desc-container {
-            padding: 24px;
-            flex: 1;
+            padding: 20px;
+            flex: 1; 
             overflow-y: auto;
-            margin: 0 24px;
+            margin: 0 20px;
             border-radius: 24px;
         }
         .app-desc-container::-webkit-scrollbar { display: none; }
-        .app-desc-container h3 { font-size: 18px; margin-bottom: 12px; color: #fff; }
-        .app-desc-container p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+        .app-desc-container h3 { font-size: 16px; margin-bottom: 10px; color: #fff; }
+        .app-desc-container p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
         
-        .launch-btn-container { padding: 20px 24px 30px; text-align: center; }
+        .launch-btn-container { 
+            padding: 15px 20px 25px; 
+            text-align: center; 
+            flex-shrink: 0; /* Ensures button stays on screen */
+            background: var(--bg-color); 
+        }
         .launch-btn {
             background: var(--primary);
             width: 100%;
-            padding: 18px;
+            padding: 16px;
             border: none;
-            border-radius: 20px;
+            border-radius: 18px;
             color: #fff;
             font-size: 16px;
             font-weight: 600;
             letter-spacing: 0.5px;
             cursor: pointer;
-            box-shadow: 0 8px 25px var(--primary-glow);
+            box-shadow: 0 6px 20px var(--primary-glow);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
@@ -257,27 +265,6 @@
             background: #fff;
             display: block;
         }
-        
-        /* Floating Close Button for Iframe */
-        .close-iframe-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            backdrop-filter: blur(10px);
-            cursor: pointer;
-        }
-        .close-iframe-btn:active { transform: scale(0.9); }
 
         /* Floating Bottom Nav */
         .bottom-nav-wrapper {
@@ -292,7 +279,7 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 12px 20px;
+            padding: 10px 20px;
             width: 200px;
             border-radius: 30px;
             background: rgba(20, 20, 30, 0.85);
@@ -301,7 +288,7 @@
         }
         .nav-item {
             color: #6b7280;
-            font-size: 22px;
+            font-size: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -326,9 +313,9 @@
 
         /* Loader */
         .loader {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-bottom-color: var(--primary);
             border-radius: 50%;
             display: inline-block;
@@ -419,6 +406,7 @@
             <h3>About this App</h3>
             <p id="det-desc">Description here</p>
         </div>
+        <!-- Open button guaranteed to stay inside screen height -->
         <div class="launch-btn-container">
             <button id="open-btn" class="launch-btn" onclick="openApp()"><i class="fas fa-play"></i> Open App</button>
         </div>
@@ -426,7 +414,6 @@
 
     <!-- Run App View -->
     <div id="run-view" class="view">
-        <button class="close-iframe-btn" onclick="goBackUI()"><i class="fas fa-times"></i></button>
         <iframe id="appFrame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
     </div>
 
@@ -480,12 +467,11 @@
                 const requestedAppId = urlParams.get('app');
                 if (requestedAppId && allApps[requestedAppId]) {
                     showDetails(requestedAppId);
-                    // Open the app directly after a short delay to allow UI rendering
                     setTimeout(() => openApp(), 300); 
                 }
             }
 
-            // Realtime Update & Kick-out logic if app gets paused
+            // Realtime Update & Kick-out logic
             if(currentAppId && allApps[currentAppId]) {
                 const app = allApps[currentAppId];
                 updateDetailsButtonState(app);
@@ -504,7 +490,6 @@
             }
         });
 
-        // Search System
         document.getElementById('searchInput').addEventListener('input', (e) => {
             renderApps(allApps, e.target.value);
         });
@@ -519,14 +504,12 @@
             Object.keys(appsObj).forEach(key => {
                 const app = appsObj[key];
                 
-                // HTML Template for both pages (Beautiful Grid System)
                 const gridHtml = `
-                    <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/90'">
+                    <img src="${app.logo}" onerror="this.src='https://via.placeholder.com/64'">
                     <h3>${app.name}</h3>
                     <div class="get-badge">OPEN</div>
                 `;
 
-                // Render in Home (Search filtering works here)
                 if(app.name.toLowerCase().includes(filterText.toLowerCase()) || 
                    app.description.toLowerCase().includes(filterText.toLowerCase())) {
                     const card = document.createElement('div');
@@ -536,7 +519,6 @@
                     appList.appendChild(card);
                 }
 
-                // Render in Explore (No filter)
                 if(exploreList && filterText === "") {
                     const gridCard = document.createElement('div');
                     gridCard.className = 'grid-card';
@@ -559,7 +541,6 @@
             }
         }
 
-        // === NAVIGATION CONTROLS ===
         function goHome() {
             switchView('home-view');
             document.getElementById('nav-home').classList.add('active');
@@ -612,10 +593,9 @@
             switchView('run-view');
         }
 
-        // === IMPROVED BACK BUTTON LOGIC ===
         function goBackUI() {
             if (document.getElementById('run-view').classList.contains('active')) {
-                document.getElementById('appFrame').srcdoc = ""; // Kill iframe
+                document.getElementById('appFrame').srcdoc = ""; 
                 switchView('details-view');
                 setUrlParam(currentAppId);
             } else if (document.getElementById('details-view').classList.contains('active')) {
@@ -625,7 +605,6 @@
             }
         }
 
-        // === URL PARAMETER MANAGEMENT ===
         function setUrlParam(id) {
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?app=' + id;
             window.history.pushState({ page: "details", appId: id }, "", newUrl);
@@ -636,17 +615,14 @@
             window.history.pushState({ page: "home" }, "", newUrl);
         }
 
-        // === IMPROVED COPY LINK SYSTEM (Fallback Added) ===
         function copyApplink() {
             const urlToCopy = window.location.href;
             
             if (navigator.clipboard && window.isSecureContext) {
-                // For HTTPS
                 navigator.clipboard.writeText(urlToCopy).then(() => {
                     alert("Direct app link copied!");
                 });
             } else {
-                // Fallback for HTTP / Mobile webview
                 let textArea = document.createElement("textarea");
                 textArea.value = urlToCopy;
                 textArea.style.position = "fixed"; 
@@ -663,7 +639,6 @@
             }
         }
 
-        // === MODAL CONTROLS ===
         function showPauseModal(message) {
             document.getElementById('pauseMessage').innerText = message;
             document.getElementById('pauseModal').classList.add('active');
@@ -673,7 +648,6 @@
             document.getElementById('pauseModal').classList.remove('active');
         }
 
-        // === HARDWARE BACK BUTTON (Phone back button) ===
         window.addEventListener("popstate", function(event) {
             if (document.getElementById('run-view').classList.contains('active')) {
                 document.getElementById('appFrame').srcdoc = ""; 
