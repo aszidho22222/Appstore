@@ -99,10 +99,9 @@
         }
         .search-bar input::placeholder { color: #6b7280; font-weight: 400; }
 
-        /* App Grid - Updated for Tight Borders */
+        /* App Grid */
         .app-grid {
             display: grid;
-            /* Auto-fill creates columns exactly the size of the app, wrapping naturally */
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
             gap: 12px; 
             padding: 10px 20px 100px;
@@ -116,7 +115,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 12px 10px; /* Very tight padding so the border hugs the app */
+            padding: 12px 10px; 
             border-radius: 18px; 
             transition: all 0.3s ease;
             cursor: pointer;
@@ -142,12 +141,12 @@
             height: 64px; 
             border-radius: 16px;
             object-fit: cover;
-            margin-bottom: 8px; /* Tighter margin */
+            margin-bottom: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             z-index: 1;
         }
         .grid-card h3 { 
-            font-size: 13px; /* Matched to tight box */
+            font-size: 13px; 
             font-weight: 600;
             color: #fff;
             display: -webkit-box; 
@@ -159,7 +158,7 @@
             width: 100%;
         }
         .grid-card .get-badge {
-            margin-top: 8px; /* Tighter margin */
+            margin-top: 8px; 
             background: rgba(255,255,255,0.1);
             color: var(--primary);
             font-size: 11px;
@@ -227,7 +226,7 @@
         .launch-btn-container { 
             padding: 15px 20px 25px; 
             text-align: center; 
-            flex-shrink: 0; /* Ensures button stays on screen */
+            flex-shrink: 0; 
             background: var(--bg-color); 
         }
         .launch-btn {
@@ -384,9 +383,7 @@
 
     <!-- Explore View -->
     <div id="explore-view" class="view">
-        <div class="header">
-            <!-- Title Removed, leaving space at the top -->
-        </div>
+        <div class="header"></div>
         <div class="app-grid" id="exploreList">
             <!-- Dynamic Grid Apps Here -->
         </div>
@@ -406,7 +403,6 @@
             <h3>About this App</h3>
             <p id="det-desc">Description here</p>
         </div>
-        <!-- Open button guaranteed to stay inside screen height -->
         <div class="launch-btn-container">
             <button id="open-btn" class="launch-btn" onclick="openApp()"><i class="fas fa-play"></i> Open App</button>
         </div>
@@ -467,7 +463,13 @@
                 const requestedAppId = urlParams.get('app');
                 if (requestedAppId && allApps[requestedAppId]) {
                     showDetails(requestedAppId);
-                    setTimeout(() => openApp(), 300); 
+                    setTimeout(() => {
+                        // যদি ওয়েবসাইট লিংক হয়, তাহলে অটোল্যাড হবে না, ইউজারকে বাটনে ক্লিক করতে হবে। 
+                        // (কারণ ব্রাউজার পপ-আপ ব্লক করতে পারে)। HTML কোড হলে অটো ওপেন হবে।
+                        if(!allApps[requestedAppId].appLink) {
+                            openApp();
+                        }
+                    }, 300); 
                 }
             }
 
@@ -482,7 +484,7 @@
                     switchView('details-view'); 
                 } else if (!app.isPaused && document.getElementById('run-view').classList.contains('active')) {
                     const iframe = document.getElementById('appFrame');
-                    if(iframe.srcdoc !== app.htmlcode) iframe.srcdoc = app.htmlcode; 
+                    if(app.htmlcode && iframe.srcdoc !== app.htmlcode) iframe.srcdoc = app.htmlcode; 
                 }
             } else if (currentAppId && !allApps[currentAppId]) {
                 alert("This app was removed by the admin.");
@@ -575,11 +577,17 @@
                 btn.innerHTML = `<i class="fas fa-pause-circle"></i> App Paused`;
                 btn.classList.add('paused');
             } else {
-                btn.innerHTML = `<i class="fas fa-play"></i> Open App`;
+                // আইকন পরিবর্তন করার জন্য চেক করা হচ্ছে এটা ওয়েবসাইট নাকি অ্যাপ
+                if(app.appLink && app.appLink.trim() !== "") {
+                    btn.innerHTML = `<i class="fas fa-external-link-alt"></i> Go to Website`;
+                } else {
+                    btn.innerHTML = `<i class="fas fa-play"></i> Open App`;
+                }
                 btn.classList.remove('paused');
             }
         }
 
+        // --- NEW UPDATE: Website Link vs HTML Code ---
         function openApp() {
             if(!currentAppId) return;
             const app = allApps[currentAppId];
@@ -589,8 +597,17 @@
                 return; 
             }
 
-            document.getElementById('appFrame').srcdoc = app.htmlcode;
-            switchView('run-view');
+            // যদি ওয়েবসাইট লিংক দেওয়া থাকে, তাহলে নতুন ট্যাবে ওপেন হবে
+            if (app.appLink && app.appLink.trim() !== "") {
+                window.open(app.appLink, '_blank'); 
+            } 
+            // যদি HTML কোড দেওয়া থাকে, তাহলে Iframe এ রান হবে
+            else if (app.htmlcode) {
+                document.getElementById('appFrame').srcdoc = app.htmlcode;
+                switchView('run-view');
+            } else {
+                alert("No content or link available for this app.");
+            }
         }
 
         function goBackUI() {
